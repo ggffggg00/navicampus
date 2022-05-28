@@ -1,6 +1,9 @@
 package ru.borisof.navicampus.core.dao.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
@@ -11,17 +14,22 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.util.Objects;
 
-@Table(name = "qr_tag", schema = "public")
+@Table(name = "qr_tag", schema = "public", indexes = {
+        @Index(name = "qrtag_index", columnList = "tag_data", unique = true)
+})
 @Entity
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class QrTag {
 
   @Id
@@ -33,8 +41,8 @@ public class QrTag {
   private String tagData;
 
   @ManyToOne(optional = false)
-  @JoinColumn(name = "graph_node_id", nullable = false)
-  private GraphNode graphNode;
+  @JoinColumn(name = "navigation_object_id", nullable = false)
+  private NavigationObject navigationObject;
 
   @Override
   public boolean equals(final Object o) {

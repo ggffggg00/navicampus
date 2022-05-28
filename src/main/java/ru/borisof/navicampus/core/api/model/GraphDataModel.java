@@ -5,7 +5,7 @@ import java.util.List;
 public record GraphDataModel(
         int buildingId,
         int floor,
-        List<GraphNodeModel> nodeList,
+        List<NodeModel> nodeList,
         List<GraphEdgeModel> edgeModelList
 ) {
 }

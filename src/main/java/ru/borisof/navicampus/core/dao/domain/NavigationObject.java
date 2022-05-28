@@ -6,8 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -39,10 +37,8 @@ public class NavigationObject {
   @JoinColumn(name = "navigation_object_type_id", nullable = false)
   private NavigationObjectType navigationObjectType;
 
-  @OnDelete(action = OnDeleteAction.CASCADE)
-  @ManyToOne(optional = false)
-  @JoinColumn(name = "graph_node_id", nullable = false)
-  private GraphNode graphNode;
+  @Column(name = "graph_node_id", nullable = false)
+  private long graphNodeId;
 
   @Override
   public boolean equals(final Object o) {

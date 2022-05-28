@@ -1,0 +1,24 @@
+body {
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+
+.main {
+    background-color: #ededed;
+    height: 100vh;
+    width: 100%;
+}
+
+.sideBar {
+    background-color: white;
+    height: 100vh;
+    width: 600px;
+
+}
+
+html, body, #map {
+    height: 100%;
+    width: 100%;
+}
