@@ -16,3 +16,11 @@ const placeMarker = (lat, lng, name, clickCallback) => {
     marker.bindPopup(name)
 }
 
+const locationMarker = (lat, lng) => {
+    let marker = new L.Marker( new L.LatLng(lat, lng),
+        {
+            color: '#109708'
+        }).addTo(map);
+    marker.bindPopup("Вы здесь")
+}
+

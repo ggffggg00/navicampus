@@ -41,7 +41,7 @@ public class NavigationObjectServiceImpl implements NavigationObjectService {
 
     @Override
     public Collection<NavigationObject> searchNavigationObjectByName(final String query) {
-        return repo.findByNameContaining(query);
+        return repo.findByNameContainingIgnoreCase(query);
     }
 
     @Override

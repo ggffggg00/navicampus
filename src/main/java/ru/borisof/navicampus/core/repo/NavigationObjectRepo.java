@@ -7,6 +7,6 @@ import java.util.Collection;
 
 public interface NavigationObjectRepo extends JpaRepository<NavigationObject, Long> {
 
-    Collection<NavigationObject> findByNameContaining(final String name);
+    Collection<NavigationObject> findByNameContainingIgnoreCase(final String name);
 
 }

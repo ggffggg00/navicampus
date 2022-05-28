@@ -85,8 +85,26 @@ h1, h2, h3, h4, h5, h6 {
     display: block;
 }
 
+.floorControl {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    border-radius: 8px;
+    background: white;
+    z-index: 1000;
+}
 
+.floorControl p {
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    border: black;
+    padding: 6px 14px;
+}
 
+.floorControl p:hover {
+    background: #aaaaaa;
+}
 
 
 

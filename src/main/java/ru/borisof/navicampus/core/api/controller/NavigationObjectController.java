@@ -45,7 +45,8 @@ public class NavigationObjectController {
 
     @GetMapping("find")
     public ResponseEntity<Collection<NavigationObject>> searchNavigationObject(@RequestParam("q") String query) {
-        return ResponseEntity.ok(service.searchNavigationObjectByName(query));
+        var places = service.searchNavigationObjectByName(query);
+        return ResponseEntity.ok(places);
     }
 
 

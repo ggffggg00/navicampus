@@ -1,39 +1,46 @@
-const searchPlace = (placeName) => {
-    return [
-        {
-            id: 20,
-            placeName: "Аудитория 428",
-            buildingName: "Главный корпус",
-            floor: 4
-        },
-        {
-            id: 21,
-            placeName: "Аудитория 429",
-            buildingName: "Главный корпус",
-            floor: 4
-        },
-        {
-            id: 22,
-            placeName: "Аудитория 427",
-            buildingName: "Главный корпус",
-            floor: 4
-        },
-        {
-            id: 23,
-            placeName: "Аудитория 426",
-            buildingName: "Главный корпус",
-            floor: 4
-        },
-        {
-            id: 25,
-            placeName: "Толкан",
-            buildingName: "Главный корпус",
-            floor: 4
-        },
-    ]
+function getFloorList(clb) {
+    var req = new XMLHttpRequest();
+    req.open('GET', "/api/building/floor", false);
+    req.send(null);
+    let resp = JSON.parse(req.response)
+    clb(resp)
 }
 
-const searchShortestPathToPlace = (placeId) => {
+    // return [
+    //     {
+    //         id: 20,
+    //         placeName: "Аудитория 428",
+    //         buildingName: "Главный корпус",
+    //         floor: 4
+    //     },
+    //     {
+    //         id: 21,
+    //         placeName: "Аудитория 429",
+    //         buildingName: "Главный корпус",
+    //         floor: 4
+    //     },
+    //     {
+    //         id: 22,
+    //         placeName: "Аудитория 427",
+    //         buildingName: "Главный корпус",
+    //         floor: 4
+    //     },
+    //     {
+    //         id: 23,
+    //         placeName: "Аудитория 426",
+    //         buildingName: "Главный корпус",
+    //         floor: 4
+    //     },
+    //     {
+    //         id: 25,
+    //         placeName: "Толкан",
+    //         buildingName: "Главный корпус",
+    //         floor: 4
+    //     },
+    // ]
+
+
+function searchShortestPathToPlace (placeId) {
     return {
         path: [
             {

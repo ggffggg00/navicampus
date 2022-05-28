@@ -30,5 +30,7 @@ public class WaypointEntity {
 
     private long navigationObjectId;
 
+    private boolean isLadder;
+
 
 }

@@ -37,8 +37,19 @@ public class NavigationObject {
   @JoinColumn(name = "navigation_object_type_id", nullable = false)
   private NavigationObjectType navigationObjectType;
 
-  @Column(name = "graph_node_id", nullable = false)
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "building_id", nullable = false)
+  private Building building;
+
+  @Column(name = "graph_node_id")
   private long graphNodeId;
+
+  @ManyToOne
+  @JoinColumn(name = "floor_id")
+  private FloorEntity floor;
+
+  @Column(name = "is_ladder", nullable = false)
+  private boolean isLadder;
 
   @Override
   public boolean equals(final Object o) {

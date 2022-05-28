@@ -18,7 +18,10 @@ public class GetAllRoutesAtFloorQuery extends Neo4jNativeQuery<Collection<GraphS
 
     @Override
     protected String createStatement() {
-        return "MATCH (:Waypoint {floor: " + floor + ", buildingId: " + buildingId + "})-[r]-()\n"
+        return "MATCH "
+               + "(:Waypoint {floor: " + floor + ", buildingId: " + buildingId + "})"
+               + "-[r]"
+               + "-(:Waypoint {floor: " + floor + ", buildingId: " + buildingId + "})\n"
                + "RETURN ID(startNode(r)) as start, ID(endNode(r)) as end, r.cost as cost";
     }
 

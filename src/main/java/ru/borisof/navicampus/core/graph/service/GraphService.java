@@ -6,20 +6,25 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.borisof.navicampus.core.common.exception.NotFoundException;
+import ru.borisof.navicampus.core.dao.domain.NavigationObject;
 import ru.borisof.navicampus.core.graph.domain.WaypointEntity;
 import ru.borisof.navicampus.core.graph.jdbc.QueryExecutor;
 import ru.borisof.navicampus.core.graph.jdbc.query.CreateEdgeQuery;
+import ru.borisof.navicampus.core.graph.jdbc.query.CreateProjectQuery;
+import ru.borisof.navicampus.core.graph.jdbc.query.DeleteEdgesByPlaceId;
+import ru.borisof.navicampus.core.graph.jdbc.query.DropProjectQuery;
 import ru.borisof.navicampus.core.graph.jdbc.query.FindShortestPathQuery;
 import ru.borisof.navicampus.core.graph.jdbc.query.GetAllRoutesAtFloorQuery;
 import ru.borisof.navicampus.core.graph.repo.WaypointRepository;
 import ru.borisof.navicampus.core.service.NavigationObjectService;
 
-import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ru.borisof.navicampus.core.common.util.Common.calculateDistanceBetweenPoints;
@@ -31,6 +36,11 @@ public class GraphService {
     private final WaypointRepository repository;
     private final QueryExecutor queryExecutor;
     private final NavigationObjectService placeService;
+
+    public WaypointEntity findByPlaceId(long placeId) {
+        return repository.findByNavigationObjectId(placeId)
+                .orElseThrow(() -> new NotFoundException("Не найдена точка на графе"));
+    }
 
     public void findShortestPath(long startPlaceId, long endPlaceId) {
         var a = placeService.getNavigationObjectById(startPlaceId);
@@ -45,17 +55,44 @@ public class GraphService {
 
     public void updateGraph(int buildingId, int floor, GraphInfo graphInfo) {
         deleteAllFloorForGraph(buildingId, floor);
+        queryExecutor.executeStm(new DropProjectQuery());
         var waypoints = graphInfo.getWaypoints();
         var routes = graphInfo.getRoutes();
 
         var waypointsSavedMap = waypoints.stream()
-                .map((el) -> Map.entry(el.getId(), repository.save(el.toEntityWithoutId())))
+                .map((el) -> Map.entry(el.getId(), saveWaypoint(el)))
                 .peek((el) -> {
-                    if (el.getValue().getNavigationObjectId() > 0)
-                        placeService.getNavigationObjectById(el.getValue().getNavigationObjectId())
-                            .setGraphNodeId(el.getValue().getId());
+                    if (el.getValue().getNavigationObjectId() > 0) {
+                        var place = placeService.getNavigationObjectById(el.getValue().getNavigationObjectId());
+                        place.setGraphNodeId(el.getValue().getId());
+                        el.getValue().setLadder(place.isLadder());
+                    }
                 })
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        //Связка лестниц на графе
+        waypointsSavedMap.values().stream()
+                .filter(WaypointEntity::isLadder)
+                .peek(el -> deleteFloorEdges(el.getNavigationObjectId()))
+                .map((el) -> repository.findAllByNavigationObjectId(el.getNavigationObjectId()))
+                .flatMap((el) -> {
+                    List<Route> res = new ArrayList<>();
+                    WaypointEntity prevWp = null;
+                    for (WaypointEntity ladEnt : el) {
+                        if (prevWp == null) {
+                            prevWp = ladEnt;
+                            continue;
+                        }
+                        res.add(Route.builder()
+                                .nodeIdStart(prevWp.getId())
+                                .nodeIdEnd(ladEnt.getId())
+                                .cost(0.)
+                                .build());
+                    }
+                    return res.stream();
+                })
+                .forEach(this::saveRoute);
+
 
         routes.stream()
                 .map((el -> {
@@ -73,6 +110,23 @@ public class GraphService {
                 }))
                 .forEach(this::saveRoute);
 
+        queryExecutor.executeStm(new CreateProjectQuery());
+
+    }
+
+    private WaypointEntity saveWaypoint(Waypoint waypoint) {
+        var e = waypoint.toEntityWithoutId();
+        NavigationObject place = null;
+        if (waypoint.getNavigationObjectId() > 0) {
+            place = placeService.getNavigationObjectById(waypoint.getNavigationObjectId());
+            e.setLadder(place.isLadder());
+        }
+
+        e = repository.save(e);
+        if (place != null) {
+            place.setGraphNodeId(e.getId());
+        }
+        return e;
     }
 
     public GraphInfo getGraphForBuildingAndFloor(int buildingId, int floor) {
@@ -80,7 +134,8 @@ public class GraphService {
 
         var routes = new HashSet<>(getFloorRoutes(buildingId, floor));
         var waypoints = nodes.stream()
-                .map(Waypoint::fromEntity).toList();
+                .map(Waypoint::fromEntity)
+                .toList();
 
         return GraphInfo.builder()
                 .buildingId(buildingId)
@@ -120,6 +175,10 @@ public class GraphService {
         private Collection<Route> routes;
     }
 
+    private void deleteFloorEdges(long placeId) {
+        queryExecutor.executeStm(new DeleteEdgesByPlaceId(placeId));
+    }
+
     @Data
     @Builder
     public static class Waypoint {
@@ -128,6 +187,7 @@ public class GraphService {
         private double lat;
         private double lng;
         private int floor;
+        private boolean isLadder;
         private long navigationObjectId;
 
         public static Waypoint fromEntity(WaypointEntity entity) {
@@ -138,6 +198,7 @@ public class GraphService {
                     .lng(entity.getLng())
                     .floor(entity.getFloor())
                     .navigationObjectId(entity.getNavigationObjectId())
+                    .isLadder(entity.isLadder())
                     .build();
         }
 
@@ -148,6 +209,7 @@ public class GraphService {
                     .lng(lng)
                     .floor(floor)
                     .navigationObjectId(navigationObjectId)
+                    .isLadder(isLadder)
                     .build();
         }
     }

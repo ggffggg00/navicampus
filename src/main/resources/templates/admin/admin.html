@@ -14,6 +14,16 @@
             crossorigin=""></script>
     <script src="https://unpkg.com/leaflet-rotate@0.1.4/dist/leaflet-rotate-src.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+
+        const _floorPlanUrl = /*[[${floorPlanUrl}]]*/ 0;
+        const _buildingId = /*[[${buildingId}]]*/ 0;
+        const _floor = /*[[${floor}]]*/ 0.0;
+
+        /*]]>*/
+    </script>
+
 </head>
 <body>
 
@@ -32,7 +42,7 @@
 </div>
 
 <div class="sideBar">
-    <div class="container border rounded">
+    <div class="container pt-3 rounded">
         <p class="lead">Режим редактирования</p>
         <div class="container m-1">
             <div class="form-check">
@@ -60,15 +70,18 @@
     </div>
     <div class="container mt-4 mb-4 " id="placeSelectorContainer" hidden>
         <p class="lead">Целевой объект</p>
-        <p>Выберите объект, к которому должна быть привязана точка</p>
-        <select class="form-select" id="placeSelector"
-                aria-label="Выберите объект, к которому должна быть привязана точка">
+        <div class="container pe-3 ps-3">
+            <p>Выберите объект, к которому должна быть привязана точка</p>
+            <select class="form-select" id="placeSelector"
+                    aria-label="Выберите объект, к которому должна быть привязана точка">
 
-            <option th:each="place : ${placesList}" th:value="${place.id}" th:text="${place.name}">Название места
-            </option>
-        </select>
+                <option th:each="place : ${placesList}" th:value="${place.id}" th:text="${place.name}">Название места
+                </option>
+            </select>
+        </div>
+
     </div>
-    <button type="button" onclick="sendGraph()" class="btn btn-success">Сохранить изменения</button>
+    <button type="button" onclick="sendGraph()" class="btn btn-success m-3">Сохранить изменения</button>
 
 </div>
 <script src="/public/js/admin.js"></script>

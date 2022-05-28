@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content= "width=device-width, user-scalable=no">
+    <meta name="viewport" content="width=device-width, user-scalable=no">
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css"
           integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
@@ -13,10 +13,22 @@
             integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
             crossorigin=""></script>
     <script src="https://unpkg.com/leaflet-rotate@0.1.4/dist/leaflet-rotate-src.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <!-- Our Custom CSS -->
     <link rel="stylesheet" href="/public/css/client/style2.css">
 
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+
+        const _floor = /*[[${floor}]]*/ 0;
+        const _buildingId = /*[[${buildingId}]]*/ 0;
+        const _lat = /*[[${lat}]]*/ 0.0;
+        const _lng = /*[[${lng}]]*/ 0.0;
+        const _floorPlan = /*[[${floorPlanUrls}]]*/ '';
+
+
+        /*]]>*/
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
     <title>NaviCampus</title>
 </head>
 <body>
@@ -28,6 +40,9 @@
     </div>
 </div>
 <div id="map"></div>
+<div class="floorControl">
+    <p th:each="floor : ${floorList}" th:val="${floor.id}" th:text="${floor.name}">Этаж</p>
+</div>
 
 
 <!-- jQuery CDN - Slim version (=without AJAX) -->
@@ -43,11 +58,10 @@
         integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm"
         crossorigin="anonymous"></script>
 
-<script src="js/api/Api.js"></script>
-<script src="/public/js/client/app.js"></script>
+<script src="/public/js/client/api/Api.js"></script>
 <script src="/public/js/client/map/Marker.js"></script>
 <script src="/public/js/client/map/ShortestPath.js"></script>
-
+<script src="/public/js/client/app.js"></script>
 
 
 </body>

@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.borisof.navicampus.core.dao.domain.Building;
+import ru.borisof.navicampus.core.dao.domain.FloorEntity;
+import ru.borisof.navicampus.core.repo.FloorRepo;
 import ru.borisof.navicampus.core.service.BuildingService;
 
 import java.util.Collection;
@@ -16,10 +18,16 @@ import java.util.Collection;
 public class BuildingController {
 
     private final BuildingService buildingService;
+    private final FloorRepo floorRepo;
 
     @GetMapping
     public ResponseEntity<Collection<Building>> getListBuildings() {
         return ResponseEntity.ok(buildingService.getBuildingList());
+    }
+
+    @GetMapping("floor")
+    public ResponseEntity<Iterable<FloorEntity>> getFloorList() {
+        return ResponseEntity.ok(floorRepo.findAll());
     }
 
 }
