@@ -3,6 +3,7 @@ package ru.borisof.navicampus.core.api.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.borisof.navicampus.core.dao.domain.Building;
@@ -28,6 +29,11 @@ public class BuildingController {
     @GetMapping("floor")
     public ResponseEntity<Iterable<FloorEntity>> getFloorList() {
         return ResponseEntity.ok(floorRepo.findAll());
+    }
+
+    @GetMapping("floor/{buildingId}")
+    public ResponseEntity<Collection<FloorEntity>> getFloorListForBuilding(@PathVariable final int buildingId) {
+        return ResponseEntity.ok(floorRepo.findAllByBuildingId(buildingId));
     }
 
 }

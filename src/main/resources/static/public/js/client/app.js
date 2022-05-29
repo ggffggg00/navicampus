@@ -1,11 +1,9 @@
-getFloorList((data) => {
-    floorPlans = data
-});
-
+floorPlans = getFloorList(_buildingId)
 
 let state = {
     map: {
-        floor: 1
+        floor: 1,
+        building: 1
     },
     currentPos: {
         lat: _lat,
@@ -34,9 +32,6 @@ var map = L.map('map', {
     contextmenu: true,
     rotate: true,
     touchRotate: true,
-    rotateControl: {
-        closeOnZeroBearing: false
-    },
     contextmenuWidth: 140,
     contextmenuItems: [{
         text: 'Show coordinates',
@@ -45,17 +40,9 @@ var map = L.map('map', {
     }]
 });
 var bounds = [[0, 0], [359, 1852]];
-changeFloor(state.currentPos.floor)
+changeFloorOrBuilding(state.currentPos.floor)
 
 map.zoomControl.setPosition('bottomright');
-
-map.fitBounds(bounds);
-map.on('click', addMarker);
-
-function addMarker(e) {
-    console.log(e)
-    latLngArr.push(e.latlng)
-}
 
 
 $("#input").on('input', (event) => {
@@ -68,9 +55,9 @@ $("#input").on('input', (event) => {
             searchResponse.forEach((el) => {
                 $("#searchResultsList").append("            " +
                     "<li data-id=" + el.id + "  class=\"searchResultItem\">\n" +
-                    "                <h4>" + el.name + "</h4>\n" +
-                    "                <p>" + el.building.name + "</p>\n" +
-                    "                <p>" + el.floor + " этаж</p>\n" +
+                    "                <p>" + el.name + "</p>\n" +
+                    "                <p class='text'>" + el.building.name + "</p>\n" +
+                    "                <p class='text'>" + el.floor.name + " этаж</p>\n" +
                     "            </li>")
             })
         });
@@ -79,11 +66,30 @@ $("#input").on('input', (event) => {
 
 $('body').on('click', 'li.searchResultItem', function (evt) {
     let id = evt.currentTarget.getAttribute("data-id")
-    let result = searchShortestPathToPlace(id);
-    buildPathOnMap(result.path)
+    let result = searchShortestPathToPlace(_placeId, id);
+
+    let routePath = {}
+    result.forEach((el) => {
+        if (routePath[el.floor] === undefined)
+            routePath[el.floor] = []
+        routePath[el.floor].push(el)
+    })
+    state.routePath = routePath
+
+    clearMapPath()
+    buildPathOnMap(routePath[state.map.floor])
     emptySearchField()
     emptySearchResultList()
 });
+
+const refreshFloorList = () => {
+    let floorControl = $(".floorControl");
+    floorControl.empty()
+    floorPlans.forEach(el => {
+        if (el.buildingId === state.map.building)
+            floorControl.append('<p val="' + el.id + '">' + el.name + '</p>')
+    })
+}
 
 const emptySearchResultList = () => {
     $("#searchResultsList").empty()
@@ -95,17 +101,10 @@ const emptySearchField = () => {
 
 function reconstructMapState() {
     setCurrentLocationMarker()
-    if (state.routePath !== null && state.routePath.length > 0) {
-        let currentFloorPath = state.routePath.filter(el => {
-            return el.floor === state.currentPos.floor
-        })
-        let polylinePoints = currentFloorPath.path.map((el) => {
-            return {
-                lat: el.lat,
-                lng: el.lng
-            }
-        })
-        buildPathOnMap(polylinePoints);
+    if (state.routePath[state.map.floor] !== undefined) {
+        buildPathOnMap(state.routePath[state.map.floor])
+    } else {
+        map.fitBounds(bounds);
     }
 }
 
@@ -115,31 +114,44 @@ function setCurrentLocationMarker() {
     }
 }
 
-$(".floorControl p").click((evt) => {
+$('.floorControl').on('click', 'p', function (evt) {
     let floor = parseInt(evt.currentTarget.getAttribute("val"))
-    changeFloor(floor)
+    changeFloorOrBuilding(floor)
 })
 
-function changeFloor(floorId) {
+$(".buildingControl").change((evt) => {
+    let id = parseInt($(".buildingControl option:selected").attr("val"))
+    state.map.building = id
+    refreshFloorList()
+})
+
+function changeFloorOrBuilding(floorId) {
     map.eachLayer(function (layer) {
         map.removeLayer(layer);
     });
-    let plan = findFloorById(floorId).planUrl
+    let plan = findFloorByBuildingAndFloor(floorId).planUrl
     image = new L.imageOverlay(plan, bounds).addTo(map);
     state.map.floor = floorId;
     reconstructMapState();
 }
 
-function findFloorById(id) {
-    return floorPlans.filter(el => el.id === id)[0];
+function clearMapPath() {
+    map.eachLayer(function (layer) {
+        if (layer.options.kek !== undefined)
+            map.removeLayer(layer);
+    });
+}
+
+function findFloorByBuildingAndFloor(floor) {
+    return floorPlans.filter(el => el.id === floor)[0];
 }
 
 
-function searchPlace (placeName, clb) {
+function searchPlace(placeName, clb) {
     let req = new XMLHttpRequest();
     req.responseType = 'json';
     req.open('GET', "/api/place/find?q=" + placeName, true);
-    req.onload  = function() {
+    req.onload = function () {
         let resp = this.response
         clb(resp)
     };

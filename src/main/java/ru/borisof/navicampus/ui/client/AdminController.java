@@ -25,15 +25,15 @@ public class AdminController {
 
     private final FloorRepo floorRepo;
 
-    @GetMapping(("editor/{buildingId}/{floor}"))
-    public String floorGraphEditor(@PathVariable final int buildingId, @PathVariable final int floor, Model model) {
-        var places = placeService.getAllNavigationObjects();
-        var floorPlan = floorRepo.findById(floor)
-                        .orElseThrow(()-> new NotFoundException("Этаж не найден")).getPlanUrl();
+    @GetMapping(("editor/{floor}"))
+    public String floorGraphEditor(@PathVariable final int floor, Model model) {
+        var floorInfo = floorRepo.findById(floor)
+                .orElseThrow(()-> new NotFoundException("Этаж не найден"));
+        var places = placeService.getPlacesAtFloor(floor, floorInfo.getBuildingId());
 
         model.addAttribute("placesList", places);
-        model.addAttribute("floorPlanUrl", floorPlan);
-        model.addAttribute("buildingId", buildingId);
+        model.addAttribute("floorPlanUrl", floorInfo.getPlanUrl());
+        model.addAttribute("buildingId", floorInfo.getBuildingId());
         model.addAttribute("floor", floor);
         return "admin/admin";
     }

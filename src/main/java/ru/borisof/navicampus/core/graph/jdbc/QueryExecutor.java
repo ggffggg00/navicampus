@@ -22,8 +22,10 @@ public class QueryExecutor {
                return query.parseResult(rs);
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            if (!query.ignoreExceptions())
+                throw new RuntimeException(e);
         }
+        return null;
     }
 
 

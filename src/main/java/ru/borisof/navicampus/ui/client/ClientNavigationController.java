@@ -10,6 +10,7 @@ import ru.borisof.navicampus.core.common.exception.NotFoundException;
 import ru.borisof.navicampus.core.dao.domain.FloorEntity;
 import ru.borisof.navicampus.core.graph.repo.WaypointRepository;
 import ru.borisof.navicampus.core.graph.service.GraphService;
+import ru.borisof.navicampus.core.service.BuildingService;
 import ru.borisof.navicampus.core.service.QrTagService;
 
 import java.util.stream.Collectors;
@@ -24,6 +25,8 @@ public class ClientNavigationController {
 
     private final GraphService graphService;
 
+    private final BuildingService buildingService;
+
     @GetMapping("{qrTag}")
     public String clientNavigationPage(@PathVariable final String qrTag, Model model) {
 
@@ -33,7 +36,7 @@ public class ClientNavigationController {
         var floorPlanUrlList = place.getBuilding().getFloorList().stream()
                 .map(FloorEntity::getPlanUrl)
                 .collect(Collectors.joining(";"));
-        var floorList = place.getBuilding().getFloorList();
+        var floorList = place.getBuilding().getFloorList().stream().sorted().toList();
 
         model.addAttribute("floor", waypoint.getFloor());
         model.addAttribute("buildingId", waypoint.getBuildingId());
@@ -41,6 +44,8 @@ public class ClientNavigationController {
         model.addAttribute("lng", waypoint.getLng());
         model.addAttribute("floorPlanUrls", floorPlanUrlList);
         model.addAttribute("floorList", floorList);
+        model.addAttribute("placeId", place.getId());
+        model.addAttribute("buildingList", buildingService.getBuildingList());
         return "client/clientNav";
     }
 

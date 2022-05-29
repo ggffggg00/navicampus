@@ -74,7 +74,7 @@
             <p>Выберите объект, к которому должна быть привязана точка</p>
             <select class="form-select" id="placeSelector"
                     aria-label="Выберите объект, к которому должна быть привязана точка">
-
+                <option value="0" id="notSelected" selected disabled hidden>Выберите объект для привязки</option>
                 <option th:each="place : ${placesList}" th:value="${place.id}" th:text="${place.name}">Название места
                 </option>
             </select>

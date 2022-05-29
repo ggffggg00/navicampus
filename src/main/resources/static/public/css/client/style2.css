@@ -32,6 +32,10 @@ h1, h2, h3, h4, h5, h6 {
     transform: translate(-50%);
 }
 
+.searchResultItem p.text{
+    font-size: 13px;
+}
+
 #input {
     width: 100%;
     height: 100%;
@@ -71,7 +75,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .auditories li:hover {
-    background-color: black;
+    background-color: #9e9e9e;
     color: white;
 }
 
@@ -106,7 +110,15 @@ h1, h2, h3, h4, h5, h6 {
     background: #aaaaaa;
 }
 
-
+.buildingControl {
+    position: absolute;
+    bottom: 10px;
+    left: 60px;
+    border-radius: 20px;
+    border: none;
+    background: white;
+    z-index: 1000;
+}
 
 @media (max-width: 768px) {
     .search {

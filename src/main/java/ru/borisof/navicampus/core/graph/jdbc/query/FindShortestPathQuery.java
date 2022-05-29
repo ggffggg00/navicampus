@@ -39,12 +39,13 @@ public class FindShortestPathQuery extends Neo4jNativeQuery<Collection<GraphServ
             while (resultSet.next()) {
                 var a = (ArrayList<LinkedHashMap<Long, Object>>) resultSet.getObject("path");
                 return a.stream()
-                        .map(el -> {
-                            return GraphService.Waypoint.builder()
-                                    .lat((Double)el.get("lat"))
-                                    .lng((Double)el.get("lng"))
-                                    .build();
-                        })
+                        .map(el -> GraphService.Waypoint.builder()
+                                .lat((Double)el.get("lat"))
+                                .lng((Double)el.get("lng"))
+                                .floor(Integer.parseInt(el.get("floor").toString()))
+                                .navigationObjectId((Long)el.get("navigationObjectId"))
+                                .buildingId(Integer.parseInt(el.get("buildingId").toString()))
+                                .build())
                         .toList();
             }
         } catch (SQLException e) {

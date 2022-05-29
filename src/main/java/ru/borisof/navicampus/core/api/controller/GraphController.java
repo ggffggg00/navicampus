@@ -9,7 +9,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.borisof.navicampus.core.graph.model.PathEntry;
 import ru.borisof.navicampus.core.graph.service.GraphService;
+
+import java.util.Collection;
 
 @RestController
 @RequestMapping("api/graph")
@@ -31,6 +34,21 @@ public class GraphController {
 
         return ResponseEntity.ok(
                 graphService.getGraphForBuildingAndFloor(buildingId, floor));
+    }
+
+    @GetMapping("findPath/{start}/{end}")
+    public ResponseEntity<Collection<PathEntry>> findShortestPath(
+            @PathVariable final long start,
+            @PathVariable final long end) {
+
+        return ResponseEntity.ok(
+                graphService.findShortestPath(start, end));
+    }
+
+    @GetMapping("connectBuildings/{start}/{end}")
+    public ResponseEntity connectBuildings(@PathVariable final int end, @PathVariable final int start) {
+        graphService.connectBuildings(start, end);
+        return ResponseEntity.of(null);
     }
 
 }

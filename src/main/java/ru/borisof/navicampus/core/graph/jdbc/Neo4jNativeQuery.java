@@ -13,6 +13,10 @@ public abstract class Neo4jNativeQuery<T> {
 
     protected abstract String createStatement();
 
+    protected boolean ignoreExceptions() {
+        return false;
+    }
+
     public abstract T parseResult(ResultSet resultSet);
 
 

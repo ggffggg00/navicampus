@@ -11,6 +11,7 @@ const routeMarker = (lat, lng, map) => {
 const placeMarker = (lat, lng, name, clickCallback) => {
     let marker = new L.Marker( new L.LatLng(lat, lng),
         {
+            kek: true,
             color: '#FF0000'
         }).addTo(map).on('clock', clickCallback);
     marker.bindPopup(name)

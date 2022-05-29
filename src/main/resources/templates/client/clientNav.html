@@ -22,6 +22,7 @@
         const _buildingId = /*[[${buildingId}]]*/ 0;
         const _lat = /*[[${lat}]]*/ 0.0;
         const _lng = /*[[${lng}]]*/ 0.0;
+        const _placeId = /*[[${placeId}]]*/ 0.0;
         const _floorPlan = /*[[${floorPlanUrls}]]*/ '';
 
 
@@ -43,6 +44,9 @@
 <div class="floorControl">
     <p th:each="floor : ${floorList}" th:val="${floor.id}" th:text="${floor.name}">Этаж</p>
 </div>
+<select class="form-select buildingControl p-1" id="buildingSelector" aria-label="Выберите здание">
+    <option th:each="building : ${buildingList}" th:val="${building.id}" th:text="${building.name}">Здание</option>
+</select>
 
 
 <!-- jQuery CDN - Slim version (=without AJAX) -->

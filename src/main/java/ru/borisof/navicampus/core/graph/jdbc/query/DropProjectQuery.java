@@ -13,6 +13,11 @@ public class DropProjectQuery extends Neo4jNativeQuery<Void> {
     }
 
     @Override
+    protected boolean ignoreExceptions() {
+        return true;
+    }
+
+    @Override
     public Void parseResult(final ResultSet resultSet) {
         return null;
     }

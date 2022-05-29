@@ -6,18 +6,17 @@ const buildPathOnMap = (path) => {
         let latLng = new L.LatLng(el.lat, el.lng)
         pointList.push(latLng);
         if (el.type === 'end') {
-            placeMarker(el.lat, el.lng, el.placeInfo.name, () => {
-                console.log("СОСИ ХУЙ")
-            })
+            placeMarker(el.lat, el.lng, el.placeInfo.name, () => {})
         }
     })
 
     let navipath = new L.Polyline(pointList, {
+        kek: true,
         color: 'green',
         weight: 10,
         opacity: 1,
         lineCap: "square",
-        smoothFactor: 1
+        smoothFactor: 5
     });
     map.addLayer(navipath)
     map.fitBounds(navipath.getBounds());

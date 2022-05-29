@@ -2,18 +2,23 @@ package ru.borisof.navicampus.core.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.comparator.Comparators;
 import ru.borisof.navicampus.core.common.exception.NotFoundException;
 import ru.borisof.navicampus.core.dao.domain.NavigationObject;
 import ru.borisof.navicampus.core.repo.NavigationObjectRepo;
 import ru.borisof.navicampus.core.service.NavigationObjectService;
 
 import java.util.Collection;
+import java.util.Comparator;
 
 @Service
 @RequiredArgsConstructor
 public class NavigationObjectServiceImpl implements NavigationObjectService {
 
     private final NavigationObjectRepo repo;
+
+    private static final Comparator<NavigationObject> PLACE_COMPARATOR =
+            Comparator.comparing(NavigationObject::getName);
 
 
     @Override
@@ -37,6 +42,11 @@ public class NavigationObjectServiceImpl implements NavigationObjectService {
     @Override
     public Collection<NavigationObject> getAllNavigationObjects() {
         return repo.findAll();
+    }
+
+    @Override
+    public Collection<NavigationObject> getPlacesAtFloor(final int floorId, int buildingId) {
+        return repo.findAllByFloorIdWithLadders(floorId, buildingId).stream().sorted(PLACE_COMPARATOR).toList();
     }
 
     @Override

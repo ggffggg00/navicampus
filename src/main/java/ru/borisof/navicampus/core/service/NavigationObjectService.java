@@ -12,6 +12,8 @@ public interface NavigationObjectService {
 
     Collection<NavigationObject> getAllNavigationObjects();
 
+    Collection<NavigationObject> getPlacesAtFloor(int floorId, int buildingId);
+
     Collection<NavigationObject> searchNavigationObjectByName(String query);
 
     NavigationObject getNavigationObjectById(long id);

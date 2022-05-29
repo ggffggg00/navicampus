@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.borisof.navicampus.core.common.exception.NotFoundException;
+import ru.borisof.navicampus.core.common.exception.ValidationException;
 import ru.borisof.navicampus.core.dao.domain.NavigationObject;
 import ru.borisof.navicampus.core.graph.domain.WaypointEntity;
 import ru.borisof.navicampus.core.graph.jdbc.QueryExecutor;
@@ -16,7 +17,9 @@ import ru.borisof.navicampus.core.graph.jdbc.query.DeleteEdgesByPlaceId;
 import ru.borisof.navicampus.core.graph.jdbc.query.DropProjectQuery;
 import ru.borisof.navicampus.core.graph.jdbc.query.FindShortestPathQuery;
 import ru.borisof.navicampus.core.graph.jdbc.query.GetAllRoutesAtFloorQuery;
+import ru.borisof.navicampus.core.graph.model.PathEntry;
 import ru.borisof.navicampus.core.graph.repo.WaypointRepository;
+import ru.borisof.navicampus.core.service.BuildingService;
 import ru.borisof.navicampus.core.service.NavigationObjectService;
 
 import java.util.ArrayList;
@@ -28,6 +31,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static ru.borisof.navicampus.core.common.util.Common.calculateDistanceBetweenPoints;
+import static ru.borisof.navicampus.core.graph.model.PathEntry.TYPE_END;
+import static ru.borisof.navicampus.core.graph.model.PathEntry.TYPE_MIDDLE;
 
 @Service
 @RequiredArgsConstructor
@@ -36,20 +41,59 @@ public class GraphService {
     private final WaypointRepository repository;
     private final QueryExecutor queryExecutor;
     private final NavigationObjectService placeService;
+    private final BuildingService buildingService;
 
     public WaypointEntity findByPlaceId(long placeId) {
         return repository.findByNavigationObjectId(placeId)
                 .orElseThrow(() -> new NotFoundException("Не найдена точка на графе"));
     }
 
-    public void findShortestPath(long startPlaceId, long endPlaceId) {
+    public void connectBuildings(int startId, int endId) {
+        var a = placeService.getNavigationObjectById(startId);
+        var b = placeService.getNavigationObjectById(endId);
+
+        if (a.getGraphNodeId()+b.getGraphNodeId() < 2){
+            throw new ValidationException("Одна из заданных точек не привязана к графу");
+        }
+
+        saveRoute(Route.builder()
+                .nodeIdStart(a.getGraphNodeId())
+                .nodeIdEnd(b.getGraphNodeId())
+                .cost(0.)
+                .build()
+        );
+    }
+
+    public Collection<PathEntry> findShortestPath(long startPlaceId, long endPlaceId) {
         var a = placeService.getNavigationObjectById(startPlaceId);
         var b = placeService.getNavigationObjectById(endPlaceId);
 
-        queryExecutor.executeStm(FindShortestPathQuery.builder()
+        var path = queryExecutor.executeStm(FindShortestPathQuery.builder()
                 .startId(a.getGraphNodeId())
                 .endId(b.getGraphNodeId())
                 .build());
+
+        if (path.isEmpty()) {
+            throw new NotFoundException("Маршрут не найден");
+        }
+
+        var pathEncoded = path.stream()
+                .map((el) -> PathEntry.builder()
+                        .lat(el.getLat())
+                        .lng(el.getLng())
+                        .floor(el.getFloor())
+                        .type(TYPE_MIDDLE)
+                        .buildingId(el.buildingId)
+                        .build()
+                ).toList();
+
+        pathEncoded.get(0).setType(PathEntry.TYPE_START);
+
+        var l = pathEncoded.size() - 1;
+        pathEncoded.get(l).setPlaceInfo(new PathEntry.PlaceInfo(b.getName()));
+        pathEncoded.get(l).setType(TYPE_END);
+
+        return pathEncoded;
 
     }
 
@@ -120,11 +164,13 @@ public class GraphService {
         if (waypoint.getNavigationObjectId() > 0) {
             place = placeService.getNavigationObjectById(waypoint.getNavigationObjectId());
             e.setLadder(place.isLadder());
+
         }
 
         e = repository.save(e);
         if (place != null) {
             place.setGraphNodeId(e.getId());
+            place = placeService.saveNavigationObject(place);
         }
         return e;
     }

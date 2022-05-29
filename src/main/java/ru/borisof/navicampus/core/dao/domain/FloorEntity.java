@@ -23,7 +23,7 @@ import java.util.Objects;
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class FloorEntity {
+public class FloorEntity implements Comparable<FloorEntity> {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
@@ -35,9 +35,12 @@ public class FloorEntity {
     @Column(name = "plan_url", nullable = false)
     private String planUrl;
 
+    @Column(name = "building_id")
+    private int buildingId;
+
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "building_id")
+    @JoinColumn(name = "building_id", insertable = false, updatable = false)
     private Building building;
 
     @Override
@@ -55,5 +58,10 @@ public class FloorEntity {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    @Override
+    public int compareTo(final FloorEntity o) {
+        return name.compareTo(o.getName());
     }
 }

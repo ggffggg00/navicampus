@@ -118,10 +118,16 @@ function markerClick(event, pointIdx) {
             $("#placeSelector option").each((idx, ch) => {
                 let optionId = parseInt(ch.getAttribute("value"))
                 if (optionId === state.points[pointIdx].placeId) {
-                    ch.setAttribute('selected','selected');
+                    ch.setAttribute('selected', 'selected');
+                } else {
+                    ch.removeAttribute('selected')
                 }
             })
-
+        } else {
+            $("#placeSelector option").each((idx, ch) => {
+                ch.removeAttribute('selected')
+            })
+            $("#placeSelector option#notSelected").attr('selected', 'selected');
         }
     }
     if (state.editMode === MODE_APPEND_ROUTE) {
